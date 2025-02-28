@@ -15,6 +15,8 @@ import { Button } from "../ui/button";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { shortenUrl } from "@/server/actions/urls/shorten-url";
+import { Card, CardContent } from "../ui/card";
+import { Copy } from "lucide-react";
 
 export function UrlShortenerForm() {
   const router = useRouter();
@@ -59,6 +61,16 @@ export function UrlShortenerForm() {
     }
   };
 
+  const copyToClipboard = async () => {
+    if (!shortUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(shortUrl);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <>
       <div className="w-full max-w-2xl mx-auto">
@@ -92,6 +104,39 @@ export function UrlShortenerForm() {
                 )}
               </Button>
             </div>
+
+            {error && (
+              <div className="p-3 bg-destructive/10 text-destructive rounded-md text-sm">
+                {error}
+              </div>
+            )}
+
+            {shortUrl && (
+              <Card>
+                <CardContent className="p-4">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
+                    Your shortened URL:
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="text"
+                      value={shortUrl}
+                      readOnly
+                      className="font-medium"
+                    />
+                    <Button
+                      type="button"
+                      variant={"outline"}
+                      className="flex-shrink-0"
+                      onClick={copyToClipboard}
+                    >
+                      <Copy className="size-4 mr-1" />
+                      Copy
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </form>
         </Form>
       </div>
