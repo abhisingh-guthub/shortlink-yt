@@ -51,7 +51,10 @@ export function Header() {
               </Button>
 
               <Button variant={"ghost"} size={"sm"} asChild>
-                <Link href={"/dashboard"} className="flex items-center gap-1">
+                <Link
+                  href={"/dashboard/stats"}
+                  className="flex items-center gap-1"
+                >
                   <LayoutDashboard className="size-4" />
                   My Stats
                 </Link>
@@ -97,7 +100,10 @@ export function Header() {
               </SheetHeader>
               <nav className="flex flex-col gap-4 mt-6">
                 <Button variant={"ghost"} size={"sm"} asChild>
-                  <Link href={"/stats"} className="flex items-center gap-2 justify-start w-full">
+                  <Link
+                    href={"/stats"}
+                    className="flex items-center gap-2 justify-start w-full"
+                  >
                     <BarChart3Icon className="size-4" />
                     Stats
                   </Link>
@@ -117,7 +123,7 @@ export function Header() {
 
                     <Button variant={"ghost"} size={"sm"} asChild>
                       <Link
-                        href={"/dashboard"}
+                        href={"/dashboard/stats"}
                         className="flex items-center gap-2 justify-start w-full"
                       >
                         <LayoutDashboard className="size-4" />
@@ -137,7 +143,10 @@ export function Header() {
                 ) : (
                   <>
                     <Button variant={"ghost"} size={"sm"} asChild>
-                      <Link href={"/login"} className="flex items-center gap-2 justify-start w-full">
+                      <Link
+                        href={"/login"}
+                        className="flex items-center gap-2 justify-start w-full"
+                      >
                         <LogIn className="size-4" />
                         Login
                       </Link>

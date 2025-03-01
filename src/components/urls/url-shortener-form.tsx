@@ -21,6 +21,7 @@ import { useSession } from "next-auth/react";
 import { QRCodeModal } from "../modals/qr-code-modal";
 import { boolean } from "drizzle-orm/gel-core";
 import { toast } from "sonner";
+import { SignupSuggestionDialog } from "../dialogs/signup-suggestion-dialog";
 
 export function UrlShortenerForm() {
   const { data: session } = useSession();
@@ -32,6 +33,7 @@ export function UrlShortenerForm() {
   const [shortCode, setShortCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showSignupDialog, setShowSignupDialog] = useState(false);
   const [isQrCodeModalOpen, setIsQrCodeModalOpen] = useState(false);
   const [flaggedInfo, setFlaggedInfo] = useState<{
     flagged: boolean;
@@ -89,6 +91,10 @@ export function UrlShortenerForm() {
 
       if (session?.user && pathname.includes("/dashboard")) {
         router.refresh();
+      }
+
+      if (!session?.user) {
+        setShowSignupDialog(true);
       }
     } catch (error) {
       setError("An error occurred. Please try again.");
@@ -217,7 +223,9 @@ export function UrlShortenerForm() {
                       <div className="flex items-start gap-2">
                         <AlertTriangle className="size-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
                         <div>
-                          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">This URL has been flagged for review</p>
+                          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                            This URL has been flagged for review
+                          </p>
                           <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
                             {flaggedInfo.message ||
                               "This URL will be reviewed by an administrator before it becomes fully active."}
@@ -238,6 +246,12 @@ export function UrlShortenerForm() {
           </form>
         </Form>
       </div>
+
+      <SignupSuggestionDialog
+        isOpen={showSignupDialog}
+        onOpenChange={setShowSignupDialog}
+        shortUrl={shortUrl || ""}
+      />
 
       {shortUrl && shortCode && (
         <QRCodeModal
