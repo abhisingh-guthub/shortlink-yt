@@ -16,9 +16,11 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 import { shortenUrl } from "@/server/actions/urls/shorten-url";
 import { Card, CardContent } from "../ui/card";
-import { Copy, QrCode } from "lucide-react";
+import { AlertTriangle, Copy, QrCode } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { QRCodeModal } from "../modals/qr-code-modal";
+import { boolean } from "drizzle-orm/gel-core";
+import { toast } from "sonner";
 
 export function UrlShortenerForm() {
   const { data: session } = useSession();
@@ -31,6 +33,11 @@ export function UrlShortenerForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isQrCodeModalOpen, setIsQrCodeModalOpen] = useState(false);
+  const [flaggedInfo, setFlaggedInfo] = useState<{
+    flagged: boolean;
+    reason: string | null;
+    message: string | undefined;
+  } | null>(null);
 
   const form = useForm<UrlFormData>({
     resolver: zodResolver(urlSchema),
@@ -45,6 +52,7 @@ export function UrlShortenerForm() {
     setError(null);
     setShortUrl(null);
     setShortCode(null);
+    setFlaggedInfo(null);
 
     try {
       const formData = new FormData();
@@ -62,6 +70,20 @@ export function UrlShortenerForm() {
         const shortCodeMatch = response.data.shortUrl.match(/\/r\/([^/]+)$/);
         if (shortCodeMatch && shortCodeMatch[1]) {
           setShortCode(shortCodeMatch[1]);
+        }
+
+        if (response.data.flagged) {
+          setFlaggedInfo({
+            flagged: response.data.flagged,
+            reason: response.data.flagReason || null,
+            message: response.data.message,
+          });
+
+          toast.warning(response.data.message || "This URL is flagged", {
+            description: response.data.flagReason,
+          });
+        } else {
+          toast.success("URL shortened successfully");
         }
       }
 
@@ -189,6 +211,27 @@ export function UrlShortenerForm() {
                       <QrCode className="size-4" />
                     </Button>
                   </div>
+
+                  {flaggedInfo && flaggedInfo.flagged && (
+                    <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="size-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">This URL has been flagged for review</p>
+                          <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                            {flaggedInfo.message ||
+                              "This URL will be reviewed by an administrator before it becomes fully active."}
+                          </p>
+                          {flaggedInfo.reason && (
+                            <p className="text-sm mt-2 text-yellow-600 dark:text-yellow-400">
+                              <span className="font-medium">Reason:</span>{" "}
+                              {flaggedInfo.reason || "Unknown reason"}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
