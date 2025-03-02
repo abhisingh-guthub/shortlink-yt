@@ -10,6 +10,7 @@ import { UserUrlsTable } from "@/components/urls/user-urls-table";
 import { getUserUrls } from "@/server/actions/urls/get-user-urls";
 import { auth } from "@/server/auth";
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dashboard | ShortLink",
@@ -52,6 +53,18 @@ export default async function DashboardPage() {
             <UserUrlsTable urls={userUrls} />
           </CardContent>
         </Card>
+
+        {process.env.NODE_ENV === "development" &&
+          session?.user.role === "admin" && (
+            <div className="text-center mt-4">
+              <Link
+                href={"/admin"}
+                className="text-sm text-muted-foreground hover:text-primary underline"
+              >
+                Admin Tools
+              </Link>
+            </div>
+          )}
       </div>
     </>
   );
