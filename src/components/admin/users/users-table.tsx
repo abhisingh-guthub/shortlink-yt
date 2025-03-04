@@ -64,6 +64,27 @@ export function UsersTable({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState<string | null>(null);
 
+  // Get the current path from window location or default to /admin/users
+  const basePath =
+    typeof window !== "undefined" ? window.location.pathname : "/admin/users";
+
+  // Extract any additional query parameters that should be preserved
+  const preserveParams = () => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    let paramString = "";
+
+    // Preserve any additional parameters if needed
+    // For example, if you have a filter parameter:
+    // if (params.has("filter")) {
+    //   paramString += `&filter=${params.get("filter")}`;
+    // }
+
+    return paramString;
+  };
+
   // Calculate pagination
   const limit = 10;
   const totalPages = Math.ceil(total / limit);
@@ -90,25 +111,37 @@ export function UsersTable({
     // Reset to page 1 when sorting
     params.set("page", "1");
 
+    // Preserve any additional parameters
+    const additionalParams = preserveParams();
+    if (additionalParams) {
+      const additionalParamsObj = new URLSearchParams(
+        additionalParams.substring(1)
+      ); // Remove the leading &
+      additionalParamsObj.forEach((value, key) => {
+        params.set(key, value);
+      });
+    }
+
     // Navigate with updated params
-    router.push(`/admin/users?${params.toString()}`);
+    router.push(`${basePath}?${params.toString()}`);
   };
 
   // Generate pagination links
   const getPaginationItems = () => {
     const items = [];
+    const additionalParams = preserveParams();
 
     // Always show first page
     items.push(
       <PaginationItem key="first">
         <PaginationLink
-          href={`/admin/users?page=1${
+          href={`${basePath}?page=1${
             currentSearch ? `&search=${currentSearch}` : ""
           }${
             currentSortBy
               ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
               : ""
-          }`}
+          }${additionalParams}`}
           isActive={currentPage === 1}
         >
           1
@@ -136,13 +169,13 @@ export function UsersTable({
       items.push(
         <PaginationItem key={i}>
           <PaginationLink
-            href={`/admin/users?page=${i}${
+            href={`${basePath}?page=${i}${
               currentSearch ? `&search=${currentSearch}` : ""
             }${
               currentSortBy
                 ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                 : ""
-            }`}
+            }${additionalParams}`}
             isActive={currentPage === i}
           >
             {i}
@@ -165,13 +198,13 @@ export function UsersTable({
       items.push(
         <PaginationItem key="last">
           <PaginationLink
-            href={`/admin/users?page=${totalPages}${
+            href={`${basePath}?page=${totalPages}${
               currentSearch ? `&search=${currentSearch}` : ""
             }${
               currentSortBy
                 ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                 : ""
-            }`}
+            }${additionalParams}`}
             isActive={currentPage === totalPages}
           >
             {totalPages}
@@ -375,13 +408,13 @@ export function UsersTable({
           <PaginationContent>
             <PaginationItem>
               <PaginationPrevious
-                href={`/admin/users?page=${Math.max(1, currentPage - 1)}${
+                href={`${basePath}?page=${Math.max(1, currentPage - 1)}${
                   currentSearch ? `&search=${currentSearch}` : ""
                 }${
                   currentSortBy
                     ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                     : ""
-                }`}
+                }${preserveParams()}`}
               />
             </PaginationItem>
 
@@ -389,14 +422,14 @@ export function UsersTable({
 
             <PaginationItem>
               <PaginationNext
-                href={`/admin/users?page=${Math.min(
+                href={`${basePath}?page=${Math.min(
                   totalPages,
                   currentPage + 1
                 )}${currentSearch ? `&search=${currentSearch}` : ""}${
                   currentSortBy
                     ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                     : ""
-                }`}
+                }${preserveParams()}`}
               />
             </PaginationItem>
           </PaginationContent>

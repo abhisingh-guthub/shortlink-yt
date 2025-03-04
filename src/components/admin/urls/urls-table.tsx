@@ -70,8 +70,26 @@ export function UrlsTable({
   const router = useRouter();
   const [copyingId, setCopyingId] = useState<number | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+  // Get the current path from window location or default to /admin/urls
   const basePath =
     typeof window !== "undefined" ? window.location.pathname : "/admin/urls";
+
+  // Extract any additional query parameters that should be preserved
+  const preserveParams = () => {
+    if (typeof window === "undefined") return "";
+
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.search);
+    let paramString = "";
+
+    // Preserve filter parameter if it exists
+    if (params.has("filter")) {
+      paramString += `&filter=${params.get("filter")}`;
+    }
+
+    return paramString;
+  };
 
   const limit = 10;
   const totalPage = Math.ceil(total / limit);
@@ -98,19 +116,19 @@ export function UrlsTable({
 
   const getPaginationItems = () => {
     const items = [];
-    const basePath = window.location.pathname;
+    const additionalParams = preserveParams();
 
     // always show first page
     items.push(
       <PaginationItem key={"first"}>
         <PaginationLink
           href={`${basePath}?page=1${
-            currentPage ? `&search=${currentSearch}` : ""
+            currentSearch ? `&search=${currentSearch}` : ""
           }${
             currentSortBy
               ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
               : ""
-          }`}
+          }${additionalParams}`}
           isActive={currentPage === 1}
         >
           1
@@ -142,7 +160,7 @@ export function UrlsTable({
               currentSortBy
                 ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                 : ""
-            }`}
+            }${additionalParams}`}
             isActive={currentPage === i}
           >
             {i}
@@ -169,7 +187,7 @@ export function UrlsTable({
               currentSortBy
                 ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                 : ""
-            }`}
+            }${additionalParams}`}
             isActive={currentPage === totalPage}
           >
             {totalPage}
@@ -490,8 +508,7 @@ export function UrlsTable({
                   currentSortBy
                     ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                     : ""
-                }
-                }`}
+                }${preserveParams()}`}
               />
             </PaginationItem>
 
@@ -506,7 +523,7 @@ export function UrlsTable({
                   currentSortBy
                     ? `&sortBy=${currentSortBy}&sortOrder=${currentSortOrder}`
                     : ""
-                }`}
+                }${preserveParams()}`}
               />
             </PaginationItem>
           </PaginationContent>
