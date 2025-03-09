@@ -32,7 +32,6 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <ToastProvider />
-            <Header />
             {children}
           </AuthProvider>
         </ThemeProvider>
